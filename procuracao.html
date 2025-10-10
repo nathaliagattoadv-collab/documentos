@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="style.css">
+  <title>PROCURAÇÃO</title>
+    <style>
+    body { background-color: rgb(0, 0, 0) ; font-family: Arial, sans-serif; margin: 20px;}
+  </style>
+</head>
+  <header class="logo"> </header>
+  <header class="titulo"> 
+    PROCURAÇÃO
+  </header> <br>
+  <br>
+<body>
+  <form id="meuFormulario">
+    <label><b>Nome do Condomínio:</b><input type="text" name="nomeC"></label>
+    <label><b>Nº DO CNPJ:</b><input type="text" name="cnpj" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18"></label>
+    <label><b>Endereço:</b><input type="text" name="endereco"></label>
+    <label><b>Bairro:</b><input type="text" name="bairro"></label>
+    <label><b>Cidade:</b><input type="text" name="cidade"></label>
+    <label><b>Estado:</b><input type="text" name="estado"></label>
+    <label><b>CEP:</b><input type="text" name="cep" id="cep" placeholder="00000-000" maxlength="9"></label>
+    <label><b>Nome Síndico:</b><input type="text" name="nomeS"></label>
+    <label><b>Nº do CPF:</b><input type="text" name="cpf" id="cpf" placeholder="000.000.000-00" maxlength="14"></label>
+    <label><b>Nº do RG E Órgão Expedidor:</b><input type="text" name="rg"></label>
+     <label><b>Cidade Rodapé: </b><input type="text" name="cidadeR"></label>
+ <label><b>Dia Assinatura: </b><input type="text" name="dia"></label>
+ <label><b>Mês Assinatura: </b></label>
+   <select id="mes" name="mes">
+     <option value="janeiro">Janeiro</option>
+     <option value="Fevereiro">Fevereiro</option>
+     <option value="Marco">Março</option>
+     <option value="abril">Abril</option>
+     <option value="maio">Maio</option>
+     <option value="junho">Junho</option>
+     <option value="julho">Julho</option>
+     <option value="agosto">Agosto</option>
+     <option value="setembro">Setembro</option>
+     <option value="outubro">Outubro</option>
+     <option value="novembro">Novembro</option>
+     <option value="dezembro">Dezembro</option>
+   </select>
+
+    <button type="button" onclick="gerarDocumento()">Gerar Documento</button>
+    <button type="button" onclick="limparFormulario()">Limpar</button>
+  </form>
+  <br>
+
+  <h2>Documento Gerado</h2>
+  <textarea id="saida" readonly></textarea>
+
+  <script>
+    let modeloCarregado = null;
+    
+    // Template padrão embutido como fallback
+    const templatePadrao = `
+<p style="text-align:center; font-weight:bold;">P R O C U R A Ç Ã O</p>
+
+<p>
+OUTORGANTE: {nomeC}, pessoa jurídica de direito privado, inscrito no CNPJ sob o n° {cnpj}, localizado à {endereco}, {bairro}, {cidade}, {estado}, {cep}, na pessoa da síndico/a {nomeS}, brasileiro/a, maior, inscrito/a no CPF nº {cpf} e RG nº {rg}, residente e domiciliado/a no endereço do condomínio.
+</p>
+
+<p>
+OUTORGADO: PAULO ESTEVES SILVA CARNEIRO, brasileiro, casado, advogado regularmente inscrito na OAB/BA nº 28.559, OAB/PR nº 56.840, OAB/SP nº 386.159, OAB/MG nº 173.179, OAB/GO nº 48.070, OAB/SC nº 47.485, OAB/PB nº 30.780-A e OAB/PE nº 58.273, OAB/MS nº 29.502-A, com escritório profissional na Avenida Marechal Floriano Peixoto, nº 170, 6º andar, Centro, Curitiba/PR, CEP nº 80.020.090, telefone (041) 3094-9730, integrante da sociedade de advogados CARNEIRO SOCIEDADE INDIVIDUAL DE ADVOCACIA, inscrita na OAB sob o nº 2716, com sede à Avenida Marechal Floriano Peixoto, nº 170, 6º andar, Centro, Curitiba/PR, CEP nº 80.020.090.
+</p>
+	
+<p>
+PODERES: amplos, gerais e irrestritos para o foro em geral, para promover a defesa dos seus direitos e interesses em juízo ou fora dele, em qualquer Instância ou Tribunal, propor contra quem de direito as ações competentes e defendê-la nas contrárias, seguindo uma e outras até final decisão, usando os recursos legais e acompanhando-os, outorgando para tanto, aos referidos procuradores, os poderes constantes da cláusula ad judicia et extra, e ainda poderes especiais para confessar, desistir, transigir, firmar compromissos ou acordos, receber valores, receber e dar quitação, endossar e receber cheques, renunciar valores e direitos, ceder créditos que são objeto de cobranças e execuções judiciais e que envolvam taxas de condomínio, levantar quantias depositadas, inclusive, junto aos bancos, às repartições públicas, autárquicas ou de economia mista federais, estaduais e municipais, podendo substabelecer a outrem, com ou sem reserva de poderes, assim como subscrever procuração para prepostos para o fim de comparecimento em audiências, enfim praticar todos os atos necessários para fiel e cabal cumprimento do presente mandato, dando tudo por valioso, firme e bom, especialmente para defender os interesses do outorgante em ações judiciais propostas contra o outorgante e em ações judicial a serem propostas em face de proprietários de unidades condominiais em situação de inadimplência quanto ao pagamento das taxas condominiais.
+</p>
+
+<p style="margin-top:40px;text-align:center;" >
+{cidadeR}, {dia} de {mes} de 2025
+</p>
+
+<p style="margin-top:80px; text-align:center; font-weight:bold;">
+_____________________________________<br>
+{nomeC}<br>
+{nomeS}
+</p>
+    `;
+
+    // Função para carregar o modelo padrão (modelo.doc da pasta atual)
+    async function carregarModeloPadrao() {
+      try {
+        const response = await fetch('./modelo.doc');
+        if (response.ok) {
+          const blob = await response.blob();
+          modeloCarregado = blob;
+          console.log('Modelo.doc carregado com sucesso');
+          return true;
+        } else {
+          console.warn('Não foi possível carregar modelo.doc, usando template padrão');
+          return false;
+        }
+      } catch (error) {
+        console.warn('Erro ao carregar modelo.doc, usando template padrão:', error);
+        return false;
+      }
+    }
+
+    // Funções para aplicar máscaras
+    function aplicarMascaraCNPJ(valor) {
+      valor = valor.replace(/\D/g, '');
+      valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1/$2');
+      valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+      return valor;
+    }
+
+    function aplicarMascaraCPF(valor) {
+      valor = valor.replace(/\D/g, '');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1-$2');
+      return valor;
+    }
+
+    function aplicarMascaraCEP(valor) {
+      valor = valor.replace(/\D/g, '');
+      valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+      return valor;
+    }
+
+    // Eventos para aplicar máscaras em tempo real
+    document.addEventListener('DOMContentLoaded', function() {
+      // Carregar modelo automaticamente
+      carregarModeloPadrao();
+      
+      // Aplicar máscaras
+      const cnpjInput = document.getElementById('cnpj');
+      const cpfInput = document.getElementById('cpf');
+      const cepInput = document.getElementById('cep');
+      
+      cnpjInput.addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraCNPJ(e.target.value);
+      });
+      
+      cpfInput.addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraCPF(e.target.value);
+      });
+      
+      cepInput.addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraCEP(e.target.value);
+      });
+    });
+
+    async function gerarDocumento() {
+      const form = document.getElementById("meuFormulario");
+      const dados = new FormData(form);
+
+      let textoModelo = '';
+      
+      // Tenta carregar o modelo.doc, se falhar usa o template padrão
+      if (!modeloCarregado) {
+        const carregado = await carregarModeloPadrao();
+        if (!carregado) {
+          console.log('Usando template padrão embutido');
+          textoModelo = templatePadrao;
+        }
+      }
+
+      // Se conseguiu carregar o arquivo modelo.doc
+      if (modeloCarregado && !textoModelo) {
+        try {
+          // Lê o arquivo modelo como array buffer
+          const arrayBuffer = await modeloCarregado.arrayBuffer();
+          
+          // Converte para texto (método simplificado para documentos .doc)
+          const uint8Array = new Uint8Array(arrayBuffer);
+          
+          // Para arquivos .doc simples, tentamos extrair texto básico
+          // Note: Este é um método simplificado. Para documentos complexos,
+          // seria necessária uma biblioteca específica como mammoth.js
+          for (let i = 0; i < uint8Array.length; i++) {
+            const char = uint8Array[i];
+            if (char >= 32 && char <= 126) { // Caracteres ASCII imprimíveis
+              textoModelo += String.fromCharCode(char);
+            } else if (char === 10 || char === 13) { // Nova linha
+              textoModelo += '\n';
+            }
+          }
+
+          // Remove caracteres de controle do Word e limpa o texto
+          textoModelo = textoModelo.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+        } catch (error) {
+          console.error('Erro ao processar modelo.doc, usando template padrão:', error);
+          textoModelo = templatePadrao;
+        }
+      }
+      
+      // Se ainda não tem texto, usa o template padrão
+      if (!textoModelo) {
+        textoModelo = templatePadrao;
+      }
+      
+      try {
+        // Aplica as substituições dos dados do formulário
+        let documentoFinal = textoModelo;
+        dados.forEach((valor, chave) => {
+          const placeholder = `{${chave}}`;
+          documentoFinal = documentoFinal.replaceAll(placeholder, valor || "___");
+        });
+
+        // Exibe o resultado na textarea
+        document.getElementById("saida").value = documentoFinal.replace(/<[^>]+>/g, '');
+
+        // Gera o arquivo para download
+        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+                       "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+                       "xmlns='http://www.w3.org/TR/REC-html40'>" +
+                       "<head><meta charset='utf-8'><title>Documento Gerado</title>" +
+                       "<style>" +
+                       "body { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 12pt; line-height: 1.0; text-align: justify; margin: 2cm; }" +
+                       "p { margin: 0 0 12px 0; }" +
+                       "</style></head><body>";
+        
+        const footer = "</body></html>";
+        
+        // Converte quebras de linha em parágrafos HTML
+        const htmlContent = documentoFinal.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+        const sourceHTML = header + '<p>' + htmlContent + '</p>' + footer;
+
+        const source = 'data:application/msword;charset=utf-8,' + encodeURIComponent(sourceHTML);
+        const fileDownload = document.createElement("a");
+        document.body.appendChild(fileDownload);
+        fileDownload.href = source;
+        fileDownload.download = 'documento_gerado.doc';
+        fileDownload.click();
+        document.body.removeChild(fileDownload);
+
+      } catch (error) {
+        console.error('Erro ao gerar documento:', error);
+        alert('Erro ao gerar documento. Verifique os dados e tente novamente.');
+      }
+    }
+
+    function limparFormulario() {
+      document.getElementById("meuFormulario").reset();
+      document.getElementById("saida").value = "";
+      modeloCarregado = null;
+    }
+  </script>
+</body>
+</html>

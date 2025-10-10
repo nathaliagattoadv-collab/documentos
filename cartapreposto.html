@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="style.css">
+  <title>CARTA DE PREPOSIÇÃO</title>
+    <style>
+    body { background-color: rgb(0, 0, 0) ; font-family: Arial, sans-serif; margin: 20px;}
+  </style>
+</head>
+  <header class="logo"> </header>
+  <header class="titulo"> 
+    CARTA DE PREPOSTO
+  </header> <br>
+  <br>
+<body>
+  <form id="meuFormulario">
+    <label><b>Nome do Representado:</b><input type="text" name="nomeR"></label>
+    <label><b>Nº DO CNPJ:</b><input type="text" name="cnpj" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18"></label>
+    <label><b>Endereço:</b><input type="text" name="endereco"></label>
+    <label><b>Bairro:</b><input type="text" name="bairro"></label>
+    <label><b>Cidade:</b><input type="text" name="cidade"></label>
+    <label><b>Estado:</b><input type="text" name="estado"></label>
+    <label><b>CEP:</b><input type="text" name="cep" id="cep" placeholder="00000-000" maxlength="9"></label>
+    <label><b>OAB: </b></label>
+        <select id="oab" name="oab">
+            <option value="OAB/BA nº 28.559">OAB/BA nº 28.559</option>
+            <option value="OAB/PR nº 56.840">OAB/PR nº 56.840</option>
+            <option value="OAB/SP nº 386.159">OAB/SP nº 386.159</option>
+            <option value="OAB/MG nº 173.179">OAB/MG nº 173.179</option>
+            <option value="OAB/GO nº 48.070">OAB/GO nº 48.070</option>
+            <option value="OAB/SC nº 47.485">OAB/SC nº 47.485</option>
+            <option value="OAB/PB nº 30.780-A">OAB/PB nº 30.780-A</option>
+            <option value="OAB/PE nº 58.273">OAB/PE nº 58.273</option>
+            <option value="OAB/MS nº 29.502-A">OAB/MS nº 29.502-A</option>
+        </select>
+    <label><b>Preposto: </b></label>
+        <select id="preposto" name="preposto">
+            <option value="KEILA ROBERTA DA SILVA, CPF nº 364.920.298-01">KEILA ROBERTA DA SILVA, CPF nº 364.920.298-01</option>
+            <option value="ANA PAULA PAES DE SOUZA, CPF nº 044.975.779-02">ANA PAULA PAES DE SOUZA, CPF nº 044.975.779-02</option>
+            <option value="NATHALIE MADELEINE BARTH, CPF nº 078.585.069-43">NATHALIE MADELEINE BARTH, CPF nº 078.585.069-43</option>
+            <option value="MARIA ANGELICA SALUSTIANO E SILVA, CPF nº 451.959.998-99">MARIA ANGELICA SALUSTIANO E SILVA, CPF nº 451.959.998-99</option>
+            <option value="ISABELA RODRIGUES TEIXEIRA, CPF nº 106.785.159-30">ISABELA RODRIGUES TEIXEIRA, CPF nº 106.785.159-30</option>
+            <option value="RAYANE NUNES VIEIRA DA SILVA, CPF nº 130.519.949-95">RAYANE NUNES VIEIRA DA SILVA, CPF nº 130.519.949-95</option>
+        </select>
+    <label><b>Cidade Rodapé: </b><input type="text" name="cidadeR"></label>
+    <label><b>Dia Assinatura: </b><input type="text" name="dia"></label>
+    <label><b>Mês Assinatura: </b></label>
+        <select id="mes" name="mes">
+            <option value="janeiro">Janeiro</option>
+            <option value="Fevereiro">Fevereiro</option>
+            <option value="Marco">Março</option>
+            <option value="abril">Abril</option>
+            <option value="maio">Maio</option>
+            <option value="junho">Junho</option>
+            <option value="julho">Julho</option>
+            <option value="agosto">Agosto</option>
+            <option value="setembro">Setembro</option>
+            <option value="outubro">Outubro</option>
+            <option value="novembro">Novembro</option>
+            <option value="dezembro">Dezembro</option>
+        </select>    
+
+    <button type="button" onclick="gerarDocumento()">Gerar Documento</button>
+    <button type="button" onclick="limparFormulario()">Limpar</button>
+  </form>
+  <br>
+
+  <h2>Documento Gerado</h2>
+  <textarea id="saida" readonly></textarea>
+
+  <script>
+    let modeloCarregado = null;
+    
+    // Template padrão embutido como fallback
+    const templatePadrao = `
+<p style="text-align:center; font-weight:bold;">CARTA  DE  PREPOSIÇÃO</p>
+
+<p>
+{nomeR}, pessoa jurídica de direito privado, inscrita no CNPJ sob n° {cnpj}, com endereço à {endereco}, {bairro}, {cidade}, {estado}, {cep}, onde recebe citações e intimações, por seu representante legal, PAULO ESTEVES SILVA CARNEIRO, brasileiro, casado, advogado, inscrito na {oab}, , com escritório profissional Av. Mal. Floriano Peixoto, nº170, 6º andar, Centro, CEP: 80020-090, Curitiba/PR, outorga à {preposto}, os poderes para representar a empresa e seu representante legal nas ações cíveis junto aos Tribunais, de qualquer instância, Repartições Públicas, Federal, Estadual ou Municipal, Procon, Decon, Juizados Especiais, podendo em nome da referida empresa, transigir, dar quitação, discordar, e todos os demais atos inerentes ao fiel cumprimento dos poderes a ele outorgados.
+</p>
+
+
+<p style="margin-top:40px;">
+{cidadeR}, {dia} de {mes} de 2025
+</p>
+
+<p style="margin-top:80px; text-align:center;">
+_____________________________________<br>
+PAULO ESTEVES SILVA CARNEIRO <br>
+{oab}
+
+</p>
+    `;
+
+    // Função para carregar o modelo padrão (modelo.doc da pasta atual)
+    async function carregarModeloPadrao() {
+      try {
+        const response = await fetch('./modelo.doc');
+        if (response.ok) {
+          const blob = await response.blob();
+          modeloCarregado = blob;
+          console.log('Modelo.doc carregado com sucesso');
+          return true;
+        } else {
+          console.warn('Não foi possível carregar modelo.doc, usando template padrão');
+          return false;
+        }
+      } catch (error) {
+        console.warn('Erro ao carregar modelo.doc, usando template padrão:', error);
+        return false;
+      }
+    }
+
+    // Funções para aplicar máscaras
+    function aplicarMascaraCNPJ(valor) {
+      valor = valor.replace(/\D/g, '');
+      valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1/$2');
+      valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+      return valor;
+    }
+
+    function aplicarMascaraCPF(valor) {
+      valor = valor.replace(/\D/g, '');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1-$2');
+      return valor;
+    }
+
+    function aplicarMascaraCEP(valor) {
+      valor = valor.replace(/\D/g, '');
+      valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+      return valor;
+    }
+
+    // Eventos para aplicar máscaras em tempo real
+    document.addEventListener('DOMContentLoaded', function() {
+      // Carregar modelo automaticamente
+      carregarModeloPadrao();
+      
+      // Aplicar máscaras
+      const cnpjInput = document.getElementById('cnpj');
+      const cpfInput = document.getElementById('cpf');
+      const cepInput = document.getElementById('cep');
+      
+      cnpjInput.addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraCNPJ(e.target.value);
+      });
+      
+      cpfInput.addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraCPF(e.target.value);
+      });
+      
+      cepInput.addEventListener('input', function(e) {
+        e.target.value = aplicarMascaraCEP(e.target.value);
+      });
+    });
+
+    async function gerarDocumento() {
+      const form = document.getElementById("meuFormulario");
+      const dados = new FormData(form);
+
+      let textoModelo = '';
+      
+      // Tenta carregar o modelo.doc, se falhar usa o template padrão
+      if (!modeloCarregado) {
+        const carregado = await carregarModeloPadrao();
+        if (!carregado) {
+          console.log('Usando template padrão embutido');
+          textoModelo = templatePadrao;
+        }
+      }
+
+      // Se conseguiu carregar o arquivo modelo.doc
+      if (modeloCarregado && !textoModelo) {
+        try {
+          // Lê o arquivo modelo como array buffer
+          const arrayBuffer = await modeloCarregado.arrayBuffer();
+          
+          // Converte para texto (método simplificado para documentos .doc)
+          const uint8Array = new Uint8Array(arrayBuffer);
+          
+          // Para arquivos .doc simples, tentamos extrair texto básico
+          // Note: Este é um método simplificado. Para documentos complexos,
+          // seria necessária uma biblioteca específica como mammoth.js
+          for (let i = 0; i < uint8Array.length; i++) {
+            const char = uint8Array[i];
+            if (char >= 32 && char <= 126) { // Caracteres ASCII imprimíveis
+              textoModelo += String.fromCharCode(char);
+            } else if (char === 10 || char === 13) { // Nova linha
+              textoModelo += '\n';
+            }
+          }
+
+          // Remove caracteres de controle do Word e limpa o texto
+          textoModelo = textoModelo.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+        } catch (error) {
+          console.error('Erro ao processar modelo.doc, usando template padrão:', error);
+          textoModelo = templatePadrao;
+        }
+      }
+      
+      // Se ainda não tem texto, usa o template padrão
+      if (!textoModelo) {
+        textoModelo = templatePadrao;
+      }
+      
+      try {
+        // Aplica as substituições dos dados do formulário
+        let documentoFinal = textoModelo;
+        dados.forEach((valor, chave) => {
+          const placeholder = `{${chave}}`;
+          documentoFinal = documentoFinal.replaceAll(placeholder, valor || "___");
+        });
+
+        // Exibe o resultado na textarea
+        document.getElementById("saida").value = documentoFinal.replace(/<[^>]+>/g, '');
+
+        // Gera o arquivo para download
+        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+                       "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+                       "xmlns='http://www.w3.org/TR/REC-html40'>" +
+                       "<head><meta charset='utf-8'><title>Documento Gerado</title>" +
+                       "<style>" +
+                       "body { font-family: 'Arial Narrow', Arial, sans-serif; font-size: 12pt; line-height: 1.0; text-align: justify; margin: 2cm; }" +
+                       "p { margin: 0 0 12px 0; }" +
+                       "</style></head><body>";
+        
+        const footer = "</body></html>";
+        
+        // Converte quebras de linha em parágrafos HTML
+        const htmlContent = documentoFinal.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+        const sourceHTML = header + '<p>' + htmlContent + '</p>' + footer;
+
+        const source = 'data:application/msword;charset=utf-8,' + encodeURIComponent(sourceHTML);
+        const fileDownload = document.createElement("a");
+        document.body.appendChild(fileDownload);
+        fileDownload.href = source;
+        fileDownload.download = 'documento_gerado.doc';
+        fileDownload.click();
+        document.body.removeChild(fileDownload);
+
+      } catch (error) {
+        console.error('Erro ao gerar documento:', error);
+        alert('Erro ao gerar documento. Verifique os dados e tente novamente.');
+      }
+    }
+
+    function limparFormulario() {
+      document.getElementById("meuFormulario").reset();
+      document.getElementById("saida").value = "";
+      modeloCarregado = null;
+    }
+  </script>
+</body>
+</html>
